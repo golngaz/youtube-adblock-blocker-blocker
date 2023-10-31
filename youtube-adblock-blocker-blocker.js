@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Youtube Adblock Blocker Blocker
 // @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  block the youtube adblock blocker
+// @version      2.0
+// @description  block the youtube adblock blocker, use Alt + b
 // @author       golngaz
 // @match        https://www.youtube.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
@@ -12,106 +12,46 @@
 (function() {
     'use strict';
 
-    const sleep = 4;
-    const watcherInterval = 1000;
+    function createModal(token) {
+        let modal = document.createElement('div');
+        modal.id = '#golngaz-modal';
+        modal.style.width = '50%';
+        modal.style.height = '315px';
+        modal.style.backgroundColor = '#939393';
+        modal.style.zIndex = '2424';
+        modal.style.position = 'absolute';
+        modal.style.left = '25%';
+        modal.style.top = '100px';
+        modal.style.borderRadius = '10px';
 
-    let idWatcher = null;
+        document.querySelector('html').appendChild(modal);
 
-    let url = window.location.href;
+        let iframe = document.createElement('iframe');
+        iframe.width = '560';
+        iframe.height = '315';
+        iframe.src = 'https://www.youtube.com/embed/'+token+'?autoplay=1&auto_play=1';
+        iframe.title = 'Remerciez Golngaz';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.allowFullscreen = true;
 
-    function wait(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+        modal.appendChild(iframe);
+        modal.innerHTML = modal.innerHTML + `<svg id="golngaz-logo" width="100" height="100" style="display: inline-block; margin: 108px 150px;cursor: pointer;">
+        <path d="M10 20 L10 80 Q10 90 20 90 H80 Q90 90 90 80 V50 H60 V70 H40 V20 H80" fill="black"></path>
+        <circle cx="70" cy="30" r="10" fill="black"></circle>
+    </svg>`;
+
+        document.querySelector('#golngaz-logo').addEventListener('click', event => {
+            modal.remove();
+        });
     }
 
-    async function clickWhenIsVisible(selector) {
-        while (true) {
-            const element = document.querySelector(selector);
-            if (element && element.offsetParent !== null) {
-                element.click();
-                return;
-            }
+    function videoToken() {
+        return window.location.href.split('/').at(-1).split('v=').at(-1).split('&').at(0);
+    }
 
-            await wait(250);
+    document.addEventListener("keydown", function(event) {
+        if (event.altKey && event.key === "b") {
+            createModal(videoToken());
         }
-    }
-
-    function tokenFromLink(link) {
-        return link.split('/').at(-1).split('?')[0];
-    }
-
-    function adblockBlockerElement() {
-        return document.querySelector('yt-playability-error-supported-renderers');
-    }
-
-    function runWatcher() {
-        if (idWatcher !== null) {
-            return;
-        }
-
-        idWatcher = setInterval(() => {
-            if (adblockBlockerElement()) {
-                clearInterval(idWatcher);
-                idWatcher = null;
-                destroyAdblockBlocker();
-            }
-        }, watcherInterval)
-    }
-
-    function runWatcherClosing() {
-        setInterval(() => {
-            if (window.location.href !== url) {
-                // Permet de remettre à neuf le noeud
-                if (document.querySelector('#golngazframe')) {
-                    location.reload();
-                } else {
-                    url = window.location.href;
-                }
-            }
-        }, watcherInterval);
-    }
-
-    // Fonction pour insérer l'iframe dans le lecteur vidéo
-    function insertIframe(token) {
-        const height = '600';
-        document.querySelector('#player-container.ytd-watch-flexy').innerHTML = `
-            <iframe
-                id="golngazframe"
-                class=""
-                src="https://www.youtube.com/embed/${token}?autoplay=1&amp;auto_play=1"
-                style="position: absolute; top: 0; left: 0; max-width: 2100px; max-height: ${height}px;"
-                width="2100"
-                height="${height}"
-                frameborder="0"
-                scrolling="no"
-                allowfullscreen=""
-                sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-<!--                tc-textcontent="true"-->
-<!--                data-tc-id="w-0.147780797001408"-->
-            ></iframe>`;
-
-        document.querySelector('#full-bleed-container').style.maxHeight = height + 'px';
-    }
-
-    // Fonction principale asynchrone
-    async function destroyAdblockBlocker() {
-        await wait(1000 * sleep);
-
-        await clickWhenIsVisible('button[aria-label="Partager"]:not([style*="display: none"])');
-
-        await wait(2000);
-
-        await clickWhenIsVisible('#close-button > button:nth-child(1)');
-
-        adblockBlockerElement().remove();
-
-        const link = document.querySelector('#share-url').value;
-        const token = tokenFromLink(link);
-
-        insertIframe(token);
-
-        runWatcher();
-    }
-
-    runWatcher();
-    runWatcherClosing();
+    });
 })();
