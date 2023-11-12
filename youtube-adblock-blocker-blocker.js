@@ -35,7 +35,7 @@
         iframe.allowFullscreen = true;
 
         modal.appendChild(iframe);
-        modal.innerHTML = modal.innerHTML + `<svg id="golngaz-logo" width="100" height="100" style="display: inline-block; margin: 108px 150px;cursor: pointer;">
+        modal.innerHTML = modal.innerHTML + `<svg id="golngaz-logo" width="100" height="100" style="display: inline-block; cursor: pointer; width: 10%;">
         <path d="M10 20 L10 80 Q10 90 20 90 H80 Q90 90 90 80 V50 H60 V70 H40 V20 H80" fill="black"></path>
         <circle cx="70" cy="30" r="10" fill="black"></circle>
     </svg>`;
