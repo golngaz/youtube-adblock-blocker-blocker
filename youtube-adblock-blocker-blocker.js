@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Youtube Adblock Blocker Blocker
 // @namespace    http://tampermonkey.net/
-// @version      2.0
+// @version      2.2
 // @description  block the youtube adblock blocker, use Alt + b
 // @author       golngaz
 // @match        https://www.youtube.com/*
@@ -12,9 +12,13 @@
 (function() {
     'use strict';
 
+    function modal() {
+        return document.querySelector('#golngaz-modal');
+    }
+
     function createModal(token) {
         let modal = document.createElement('div');
-        modal.id = '#golngaz-modal';
+        modal.id = 'golngaz-modal';
         modal.style.width = '50%';
         modal.style.height = '315px';
         modal.style.backgroundColor = '#939393';
@@ -50,7 +54,7 @@
     }
 
     document.addEventListener("keydown", function(event) {
-        if (event.altKey && event.key === "b") {
+        if (!modal() && event.altKey && event.key === "b") {
             createModal(videoToken());
         }
     });
